@@ -1,36 +1,61 @@
 import java.util.Random;
+import java.lang.StringBuilder;
 
 class SearchThread extends Thread{
 
+    public final int MatrixSize = 1000;
     private int start;
     private int end;
+    private char[][] matrix;
+    private int length;
+    private int total;
 
-    public SearchThread(int start, int end){
+    public SearchThread(int start, int end, int length, char[][] matrix){
         this.start = start;
         this.end = end;
+        this.length = length;
+        this.matrix  = matrix;
+        this.total = 0;
     }
 
-    public Boolean isPalindrome(String str) { 
+    public int getTotal(){
+        return total;
+    }
 
+    public void run(){
+
+        for(int j = start; j < end; j++){  //right to left
+            for(int k = MatrixSize - 1; k > length - 1; k--){
+                StringBuilder sb = new StringBuilder();
+
+                for(int i = 0; i < length; i++){
+                    char c = matrix[j][k - i];
+                    sb.append(c);
+                }
+
+                if(isPalindrome(sb.toString())){
+                    total++;
+                }
+            }
+        }
+    }
+
+
+    public Boolean isPalindrome(String str) { 
         int length = str.length(); 
 
         for (int i = 0; i < length / 2; i++) { 
-
             if (str.charAt(i) != str.charAt(length - i - 1)) { 
-
-                break; 
-
+                return false; 
             } 
-
         }
-
         return true;
     } 
 }
 
 public class ConcurrentDevelopmentAssignment1 {
     
-    public static final int MatrixSize = 10;
+    public static final int MatrixSize = 1000;
     
     public static void main(String[] args) {
         Random rand = new Random();
@@ -44,16 +69,20 @@ public class ConcurrentDevelopmentAssignment1 {
                 matrix[i][j] = (char)('a' + rand.nextInt(26)); //assign random char in matrix
             }
         }
-
-        for(int i = 0; i < numThreads; i++){
-            Parallel(i);
+        
+        for(int i = 1; i < numThreads; i++){ 
+            for(int j = 3; j <= 6; j++){ //find the palindrome from 3 - 6 length
+                int ans = Parallel(i, j, matrix);
+                System.out.printf("%d palindromes of size %d found using %d threads.\n", ans, j, i);
+            }
         }
 
     }
 
-    public static void Parallel(int numThreads){
+    public static int Parallel(int numThreads, int length, char[][] matrix){
         SearchThread[] t = new SearchThread[numThreads];
         int rowsPerThread = MatrixSize / numThreads;
+        int total = 0;
 
         for(int i = 0; i < numThreads;i++){
             int start = i * rowsPerThread; // start row for each thread
@@ -64,16 +93,19 @@ public class ConcurrentDevelopmentAssignment1 {
                 end = start + rowsPerThread; // else just do this
             }
             
-            t[i] = new SearchThread(start, end);
+            t[i] = new SearchThread(start, end, length, matrix);
             t[i].start();         
         }
 
         try{
             for(int i = 0; i < numThreads; i++){
                 t[i].join();
+                total += t[i].getTotal();
             }
         }catch(InterruptedException ex){
             ex.printStackTrace();
         }
+
+        return total;
     }    
 }
