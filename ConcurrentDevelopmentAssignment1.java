@@ -38,6 +38,35 @@ class SearchThread extends Thread{
                 }
             }
         }
+
+        for(int i = 0; i < MatrixSize; i++){ //up to down
+            for(int j = start; j < end - length; j++){
+                StringBuilder sb = new StringBuilder();
+                for(int k = 0; k < length; k++){
+                    char c = matrix[j+k][i];
+                    sb.append(c);
+                }
+
+                if(isPalindrome(sb.toString())){
+                    total++;
+                }
+            }
+        }
+        
+        for(int j = start; j < end - length; j++){ //up to down diagonally
+            for(int i = 0; i < MatrixSize - length; i++){
+                StringBuilder sb = new StringBuilder();
+                for(int k = 0; k < length; k++){
+                    char c = matrix[j+k][i+k];
+                    sb.append(c);
+                }
+
+                if(isPalindrome(sb.toString())){
+                    total++;
+                }
+            }
+        }
+
     }
 
 
@@ -72,8 +101,11 @@ public class ConcurrentDevelopmentAssignment1 {
         
         for(int i = 1; i < numThreads; i++){ 
             for(int j = 3; j <= 6; j++){ //find the palindrome from 3 - 6 length
+                long startTime = System.nanoTime();
                 int ans = Parallel(i, j, matrix);
-                System.out.printf("%d palindromes of size %d found using %d threads.\n", ans, j, i);
+                long endTime = System.nanoTime();
+                double time = (endTime - startTime) / 1000000000.0; //convert nano seconds to seconds
+                System.out.printf("%d palindromes of size %d found in %.6fs using %d threads.\n", ans, j, time, i);
             }
         }
 
