@@ -69,7 +69,6 @@ class SearchThread extends Thread{
 
     }
 
-
     public Boolean isPalindrome(String str) { 
         int length = str.length(); 
 
